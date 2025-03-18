@@ -1,0 +1,296 @@
+    <!-- product -->
+    <body>
+    <div class="py-5">
+      <div class="container py-4">
+        <div class="row g-5">
+          <div class="col-lg-6 col-12 mb-4">
+            <div class="big-img">
+              <img [src]="selectedImage" alt="Main product image" class="img-fluid rounded" />
+            </div>
+            <div class="small-img shop-product-detail-slider px-2 " style="position: relative;bottom: 15px;">
+              <div class="thumbnail-slider">
+                <div *ngFor="let image of productGallery" (click)="selectImage(image)">
+                  <img [src]="image" alt="Thumbnail" class="img-fluid" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-12 ps-lg-5">
+            <p class="text-uppercase text-purple mb-1 fw-bold">{{ product?.categoryId }}</p>
+            <h1 class="fw-bold pb-2 display-5">{{ product?.name }}</h1>
+            <div class="d-flex align-items-center gap-1 mb-3">
+              <i class="ri-star-fill text-warning" *ngFor="let star of [].constructor(Math.floor(product?.rating || 0))"></i>
+              <i class="ri-star-fill text-warning-emphasis" *ngIf="product?.rating && product.rating % 1 !== 0"></i>              
+              <a class="small ps-2">({{totalReviews}} customer review)</a>
+            </div>
+            <h5 class="fw-bold">{{ product?.price | currency }}</h5>
+            <div class="border-bottom py-4">
+              <p class="text-muted">
+                {{ product?.description }}
+              </p>
+            </div>
+            <div class="border-bottom py-4 mb-4">
+              <div class="mb-3">
+                <p class="form-label small">Size</p>
+                <div class="btn-group gap-2" role="group" aria-label="Basic radio toggle button group">
+                  <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+                  <label class="btn btn-outline-secondary rounded-2" for="btnradio1">XS</label>                                  
+                  <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+                  <label class="btn btn-outline-secondary rounded-2" for="btnradio2">SM</label>
+                  <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+                  <label class="btn btn-outline-secondary rounded-2" for="btnradio3">LG</label>
+                  <input type="radio" class="btn-check" name="btnradio" id="btnradio4" autocomplete="off">
+                  <label class="btn btn-outline-secondary rounded-2" for="btnradio4">XXL</label>
+                </div>
+              </div>
+              <div class="mb-3">
+                <p class="form-label small">Colour</p>
+                <div class="btn-group gap-2" role="group" aria-label="Basic radio toggle button group">
+                  <input type="radio" class="btn-check" name="btnradiow" id="btnradio1s" autocomplete="off" checked>
+                  <label class="btn btn-outline-secondary rounded-2" for="btnradio1s">Black</label>                                  
+                  <input type="radio" class="btn-check" name="btnradiow" id="btnradio2s" autocomplete="off">
+                  <label class="btn btn-outline-secondary rounded-2" for="btnradio2s">Gray</label>
+                  <input type="radio" class="btn-check" name="btnradiow" id="btnradio3s" autocomplete="off">
+                  <label class="btn btn-outline-secondary rounded-2" for="btnradio3s">Red</label>
+                </div>
+              </div>
+            </div>
+            <div class="row align-items-center pt-3 pb-3">
+              <div class="col-6">
+                <a href="#" class="btn btn-dark btn-lg py-3 px-3 rounded w-100">Add to cart</a>
+              </div>
+              <div class="col-6"><a href="#" class="btn btn-purple btn-lg py-3 px-3 rounded w-100" >Buy Now</a></div>
+            </div>
+            <div class="pt-3">
+              <p class="small mb-2"><span class="fw-bold">SKU:</span> {{ product?.stock }}</p>
+              <p class="small mb-0"><span class="fw-bold">CATEGORY:</span> <a href="#">{{ product?.categoryName }}</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <!-- tabs -->
+    <div class="py-5 bg-light">
+        <div class="container py-4">
+          <div class="row">
+            <div class="col-12">
+              <nav>
+                <div class="nav nav-tabs d-flex justify-content-center gap-2 nav-tabs-osahan" id="nav-tab" role="tablist">
+                  <button 
+                    class="nav-link px-lg-4 py-lg-3" 
+                    id="nav-description-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#nav-description" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="nav-description" 
+                    aria-selected="true"
+                    [ngClass]="{'active': activeTab === 1}" 
+                    (click)="setActiveTab(1)">
+                    Description
+                  </button>
+                  <button 
+                    class="nav-link px-lg-4 py-lg-3" 
+                    id="nav-additional-information-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#nav-additional-information" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="nav-additional-information" 
+                    aria-selected="false"
+                    [ngClass]="{'active': activeTab === 2}" 
+                    (click)="setActiveTab(2)">
+                    Information
+                  </button>
+                  <button 
+                    class="nav-link px-lg-4 py-lg-3" 
+                    id="nav-reviews-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#nav-reviews" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="nav-reviews" 
+                    aria-selected="false"
+                    [ngClass]="{'active': activeTab === 3}" 
+                    (click)="setActiveTab(3)">
+                    Reviews
+                  </button>
+                </div>
+              </nav>
+              <div class="tab-content bg-white p-lg-5 p-4 border-end border-bottom border-start" id="nav-tabContent">
+                <div class="tab-pane fade" [ngClass]="{'show active': activeTab === 1}" id="nav-description" role="tabpanel" aria-labelledby="nav-description-tab">
+                  <h4 class="fw-bold pb-2">Description</h4>
+                  <p>
+                    Morbi tincidunt ornare massa eget egestas purus viverra. In vitae turpis massa sed elementum tempus egestas sed. Euismod in pellentesque massa placerat duis ultricies. Justo donec enim diam vulputate ut
+                    pharetra sit. At auctor urna nunc id cursus metus aliquam eleifend. Ipsum nunc aliquet bibendum enim. Et malesuada fames ac turpis egestas sed tempus.
+                  </p>
+                  <p>Nisi scelerisque eu ultrices vitae auctor. Sodales ut etiam sit amet nisl purus in mollis. Turpis tincidunt id aliquet risus. Aliquet sagittis id consectetur purus.</p>
+                </div>
+                <div class="tab-pane fade" [ngClass]="{'show active': activeTab === 2}" id="nav-additional-information" role="tabpanel" aria-labelledby="nav-additional-information-tab">
+                  <h4 class="fw-bold pb-2">Additional information</h4>
+                  <table class="table table-striped table-bordered">
+                    <tbody>
+                      <tr>
+                        <td>Color</td>
+                        <td>Black, Blue, Grey, White</td>
+                      </tr>
+                      <tr>
+                        <td>Size</td>
+                        <td>Medium, Small</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <h5 class="fw-bold pt-3">Size Comparison</h5>
+                  <table class="table table-striped table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Size</th>
+                        <th>Width (W)</th>
+                        <th>Depth (D)</th>
+                        <th>Height (H)</th>
+                        <th>Best For</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let size of sizes">
+                        <td>{{ size.name }}</td>
+                        <td>{{ size.width }}</td>
+                        <td>{{ size.depth }}</td>
+                        <td>{{ size.height }}</td>
+                        <td>{{ size.bestFor }}</td>
+                      </tr>
+                    </tbody>   
+                  </table>                   
+                </div>
+                <div class="tab-pane fade" [ngClass]="{ 'show active': activeTab === 3 }" id="nav-reviews" role="tabpanel" aria-labelledby="nav-reviews-tab">
+                  <div class="row">
+                    <!-- Reviews List -->
+                    <div class="col-lg-6 col-12 pe-lg-5">
+                      <h4 class="fw-bold border-bottom pb-4">{{ totalReviews }} Review(s)</h4>
+                      <div class="d-flex align-items-start gap-3 py-3" *ngFor="let review of productReviews">
+                        <img
+                          class="img-fluid rounded-circle avtar-sm"
+                          [src]="'data:image/png;base64,' + review.profile_picture_url"
+                          alt="Image Description"
+                        />
+                        <div class="w-100">
+                          <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex align-items-end gap-2">
+                              <h5 class="fw-bold m-0">{{ review.username }}</h5>
+                              <span class="text-muted fw-normal small">{{ review.createdAt | date: 'MMMM d, yyyy' }}</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                              <!-- Generate stars dynamically -->
+                              <ng-container *ngFor="let star of [].constructor(review.reviewerRating); let i = index">
+                                <i class="ri-star-fill text-warning"></i>
+                              </ng-container>
+                              <ng-container *ngFor="let emptyStar of [].constructor(5 - review.reviewerRating); let i = index">
+                                <i class="ri-star-line text-muted"></i>
+                              </ng-container>
+                            </div>
+                          </div>
+                          <p class="text-muted">{{ review.reviewerMessage }}</p>
+                        </div>
+                      </div>
+                    </div>
+                
+                    <!-- Review Form -->
+                    <div class="col-lg-6 col-12">
+                      <div class="mb-3">
+                        <h4 class="fw-bold">Add a review</h4>
+                        <div class="d-flex gap-4">
+                          <p class="mb-0">Your Rating:</p>
+                          <div class="d-flex align-items-center gap-2">
+                            <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let i = index">
+                              <i
+                                class="ri-star-fill"
+                                [class.text-warning]="i < reviewForm.get('reviewerRating')?.value"
+                                [class.text-muted]="i >= reviewForm.get('reviewerRating')?.value"
+                                (click)="setRating(i + 1)"
+                                style="cursor: pointer;"
+                              ></i>
+                            </ng-container>
+                          </div>
+                        </div>
+                      </div>
+                      <form [formGroup]="reviewForm" (ngSubmit)="saveReview()">
+                        <div class="mb-3">
+                          <textarea
+                            class="form-control bg-transparent"
+                            rows="5"
+                            formControlName="reviewerMessage"
+                            placeholder="Your review"
+                          ></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-dark px-3" [disabled]="reviewForm.invalid">Submit</button>
+                      </form>
+                    </div>
+                  </div>
+                
+                  <!-- Pagination -->
+                  <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Page navigation example">
+                      <ul class="pagination">
+                        <li class="page-item" [class.disabled]="currentPage === 1">
+                          <a class="page-link" [ngStyle]="{'pointer':'cursor'}" (click)="fetchAllReviews(currentPage - 1)" tabindex="-1">&laquo;</a>
+                        </li>
+                        <li
+                          class="page-item"
+                          *ngFor="let page of getPageNumbers()"
+                          [class.active]="page === currentPage"
+                        >
+                          <a class="page-link" (click)="fetchAllReviews(page)">{{ page }}</a>
+                        </li>
+                        <li class="page-item" [class.disabled]="currentPage === getPageNumbers().length">
+                          <a class="page-link" (click)="fetchAllReviews(currentPage + 1)">&raquo;</a>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="py-5">
+        <div class="container py-4">
+          <div class="row mb-3">
+            <div class="col-12">
+              <h4 class="fw-bold">Related products</h4>
+            </div>
+          </div>
+          <div class="row g-4">
+            <div class="col-lg-3 col-md-6 col-12" *ngFor="let product of relatedProducts; let i = index">
+              <div class="card bg-transparent border-0 h-100">
+                <a  class="position-relative" [ngStyle]="{'cursor':'pointer'}">
+                  <!-- Show the SALE badge only for the first product (index 0) -->
+                  <span *ngIf="i === 0" class="badge text-bg-warning rounded-1 p-2 position-absolute m-3">SALE!</span>
+                  <img [src]="'data:image/png;base64,' + product.imageData" class="card-img-top rounded" alt="product-image"
+                  (click)="navigateToProductDetail(product.productId)">
+                  
+                </a>
+                <div class="card-body px-0">
+                  <h5 class="card-title">{{ product.name }}</h5>
+                  <p class="card-text text-muted">${{ product.price }}</p>
+                  <p class="card-text text-muted">{{ product.description }}</p> <!-- Display description -->
+                  
+                  <!-- Rating -->
+                  <!-- <div class="d-flex align-items-center gap-2 mb-2">
+                    <i *ngFor="let star of [].constructor(product.rating); let i = index" class="ri-star-fill text-warning"></i>
+                    <i *ngFor="let star of [].constructor(5 - product.rating); let i = index" class="ri-star-fill text-body-tertiary"></i>
+                  </div> -->
+                </div>
+                <div class="card-footer bg-transparent border-0 px-0">
+                  <a href="#" class="btn btn-dark">Add to cart</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+  </body>

@@ -1,0 +1,254 @@
+import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ProductsService } from '../../../core/services/products.service';
+import { DecodeService } from '../../../core/services/decode.service';
+import { ProductReviewsService } from '../../../core/services/product-reviews.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../../core/auth/service/auth.service';
+import { EncodeService } from '../../../core/services/encode.service';
+declare var $: any; // Declare jQuery
+
+@Component({
+  selector: 'app-product-detail',
+  templateUrl: './product-detail.component.html',
+  styleUrl: './product-detail.component.scss'
+})
+export class ProductDetailComponent implements OnInit, AfterViewInit {
+  // Expose Math to the template
+  Math = Math;
+  product: any;
+  decodeProductId: any;
+  reviewForm: FormGroup;
+  selectedImage: string = '';
+  activeTab: number = 1; // Default to 'Description' tab
+  relatedProducts: any[] = []; // Array to store related products
+  productGallery: string[] = []; // product carousel images
+  error: string | null = null; // Error state
+  loading: boolean = false; // Loader state
+  productReviews: any;
+  currentPage: number = 1; // Current page number
+  pageSize: number = 5; // Number of reviews per page
+  totalReviews: number = 0; // Total number of reviews
+  sizes = [
+    { name: 'Small', width: '40 cm', depth: '45 cm', height: '80 cm', bestFor: 'Compact spaces' },
+    { name: 'Medium', width: '45 cm', depth: '50 cm', height: '85 cm', bestFor: 'Standard use' },
+    { name: 'Large', width: '50 cm', depth: '60 cm', height: '90 cm', bestFor: 'Spacious areas' },
+  ];
+
+  constructor(
+    private _router: Router,
+    private _fb: FormBuilder,
+    private _route: ActivatedRoute,
+    private _authService: AuthService,
+    private _decodeService: DecodeService,
+    private _encodeService: EncodeService,
+    private _productService: ProductsService,
+    private _productReviewsService: ProductReviewsService,
+  ) {
+    this.fetchProductById()
+    this.reviewForm = this._fb.group({
+      reviewerRating: [0, Validators.required], // Rating is required
+      reviewerMessage: ['', Validators.required]
+    });
+  }
+  ngOnInit(): void {
+    this.fetchAllReviews()
+    this.fetchRelatedProducts()
+
+  }
+  ngAfterViewInit() {
+    // Wait for data to load, then initialize Slick
+    setTimeout(() => {
+      $('.thumbnail-slider').slick({
+        slidesToShow: 5, // Number of visible thumbnails
+        slidesToScroll: 1, // Number of thumbnails to scroll at a time
+        arrows: true, // Show next/prev arrows
+        infinite: true, // Enable looping of images
+        focusOnSelect: true, // Highlight selected thumbnail
+        centerMode: false, // Centering the active slide (optional, set false to align left)
+        responsive: [
+          {
+            breakpoint: 768, // For smaller devices
+            settings: {
+              slidesToShow: 4,
+              slidesToScroll: 1,
+            },
+          },
+          {
+            breakpoint: 480, // For very small devices
+            settings: {
+              slidesToShow: 2,
+              slidesToScroll: 1,
+            },
+          },
+        ],
+      });
+    }, 500); // Delay for initialization
+  }
+  selectImage(image: string) {
+    this.selectedImage = image; // Update the selected image
+  }
+  setActiveTab(tabIndex: number): void {
+    this.activeTab = tabIndex;
+  }
+
+  fetchAllReviews(pageNumber: number = 1): void {
+    this.currentPage = pageNumber;
+    this._productReviewsService
+      .getAllproductReviews(this.currentPage, this.pageSize)
+      .subscribe({
+        next: (response: any) => {
+          console.log("<-----Pagination Response---->", response)
+          this.productReviews = response.respData.respData;
+          this.totalReviews = response.respData.totalRecords; // Ensure backend returns totalRecords
+        },
+        error: (err: any) => {
+          console.error('Error fetching product reviews:', err);
+        },
+      });
+  }
+
+  //for pagination
+  getPageNumbers(): number[] {
+    const totalPages = Math.ceil(this.totalReviews / this.pageSize);
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+  setRating(rating: number): void {
+    this.reviewForm.get('reviewerRating')?.setValue(rating);
+  }
+  fetchProductById() {
+    const productId = this._route.snapshot.paramMap.get('id');
+    if (productId) {
+      const decodedId = this._decodeService.decode(productId);
+      this.decodeProductId = this._decodeService.decode(productId);
+      if (decodedId !== null) {
+        const numericProductId = +decodedId; // Convert string to number
+        if (!isNaN(numericProductId)) {
+          this._productService.getProductsByProductId(numericProductId).subscribe({
+            next: (data) => {
+              this.product = data.respData;  // Assuming 'respData' contains product details
+              console.log('<-----Product Details----->', data);
+
+              // Set the default image (primary image) if exists
+              const primaryImage = this.product.primaryGallery.find((image: any) => image.primary);
+              this.selectedImage = primaryImage ? `data:image/png;base64,${primaryImage.imageData}` : '';  // Use default primary image
+
+              // Collect all product images
+              this.productGallery = this.product.primaryGallery.map((image: any) => `data:image/png;base64,${image.imageData}`);
+            },
+            error: (err) => console.error('Error fetching product details:', err),
+          });
+        } else {
+          console.error('Decoded ID is not a valid number:', decodedId);
+        }
+      } else {
+        console.error('Decoding failed for product ID:', productId);
+      }
+    } else {
+      console.error('Product ID is missing from route parameters');
+    }
+  }
+  saveReview(): void {
+    if (this.reviewForm.valid && this._authService.isLogin()) {
+      const userData = localStorage.getItem("data");
+      if (userData) {
+        try {
+          const parsedData = JSON.parse(userData);
+
+          if (parsedData && parsedData.respData.userId) {
+            const reviewPayload = {
+              userId: parsedData.respData.userId,
+              productId: this.decodeProductId,
+              ...this.reviewForm.value,
+            };
+            this._productReviewsService.saveReview(reviewPayload).subscribe({
+              next: (response) => {
+                console.log('Review saved successfully:', response);
+                this.fetchAllReviews();
+              },
+              error: (error) => {
+                console.error('Error saving review:', error);
+              }
+            });
+          } else {
+            console.error('userId is missing in userData:', parsedData);
+          }
+        } catch (error) {
+          console.error('Error parsing userData:', error);
+        }
+      } else {
+        console.error('No user data found in localStorage.');
+      }
+    }
+    else {
+      this._router.navigate(['/signin'])
+    }
+  }
+  fetchRelatedProducts(): void {
+    this._productService.getRelatedProducts(this.decodeProductId).subscribe({
+      next: (response) => {
+        if (response.respCode === 200) {
+          console.log("<------Productsss----->", response);
+          this.relatedProducts = response.respData; // Use this for template
+        } else {
+          this.error = 'No related products found.';
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching related products:', err);
+        this.error = 'An error occurred while loading related products.';
+        this.loading = false;
+      }
+    });
+  }
+  navigateToProductDetail(product: any): void {
+    console.log("<-----Product id----->", product);
+    const encodedId = this._encodeService.encode(product.toString()); // Encode product ID
+    this._router.navigate([`/store/productDetail/${encodedId}`]).then(() => {
+      window.location.reload();
+      // Wait for the navigation to complete, then re-fetch related products and reinitialize the view
+      this.fetchRelatedProducts(); // Re-fetch related products after navigation
+      this.fetchProductById()
+    });
+
+
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"styles": [
+              "src/assets/vender/bootstrap/css/bootstrap.min.css",
+              "src/assets/vender/icofont/icofont.min.css",
+              "node_modules/aos/dist/aos.css",
+              "src/assets/vender/remixicon/remixicon.css",
+              "src/assets/css/style.css",
+              "node_modules/slick-carousel/slick/slick.scss",
+              "node_modules/slick-carousel/slick/slick-theme.scss",            
+              "src/assets/css/common.css",
+              "src/styles.scss"            
+            ],
+            "scripts": [
+              "src/assets/vender/jquery/jquery-3.6.4.min.js",
+              "node_modules/slick-carousel/slick/slick.min.js",
+              "src/assets/vender/bootstrap/js/bootstrap.bundle.min.js",
+              "node_modules/aos/dist/aos.js",
+              "src/assets/js/script.js"
+            ]
