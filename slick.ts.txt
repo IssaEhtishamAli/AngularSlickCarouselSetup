@@ -256,8 +256,6 @@ Account Number
 IBAN
 PK82ALFH0008001010128022
 
-  Swift code
-ALFHPKKAXXX
 
 Branch Name
 Satellite Town Rawalpindi
