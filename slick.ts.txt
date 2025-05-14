@@ -213,27 +213,6 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
 
 
   }
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 "styles": [
               "src/assets/vender/bootstrap/css/bootstrap.min.css",
               "src/assets/vender/icofont/icofont.min.css",
@@ -252,3 +231,39 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
               "node_modules/aos/dist/aos.js",
               "src/assets/js/script.js"
             ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Account Title
+EHTISHAM ALI
+
+Account Number
+00081010128022
+
+IBAN
+PK82ALFH0008001010128022
+
+  Swift code
+ALFHPKKAXXX
+
+Branch Name
+Satellite Town Rawalpindi
+
+Branch Code
+0008
+
+Bank Name
+Bank Alfalah
